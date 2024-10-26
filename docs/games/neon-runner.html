@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Runner</title>
+    <link rel="stylesheet" href="https://neongames00.github.io/styles.css">
+    <link rel="icon" href="../favicon.png" type="image/png">
+    <style>
+        /* CSS styles remain unchanged */
+        #gameCanvas {
+            border: 2px solid var(--accent-color);
+            background: black;
+            box-shadow: 0 0 20px var(--accent-color);
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .game-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .game-stats {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent-color);
+            margin: 20px 0;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            width: 1200px;
+            margin-top: 20px;
+        }
+
+        .player-controls {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--accent-color);
+        }
+
+        .player-controls h3 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .control-key {
+            display: inline-block;
+            padding: 5px 10px;
+            background: rgba(33, 150, 243, 0.3);
+            border: 1px solid var(--accent-color);
+            border-radius: 5px;
+            color: white;
+            margin: 2px;
+        }
+        
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-color);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <header class="glass-header">
+        <div class="logo-container">
+            <h1 class="glow-text">Neon Runner</h1>
+        </div>
+        <div id="nav-container"></div> <!-- Placeholder for navigation -->
+    </header>
+
+    <main class="fade-in">
+        <div class="game-container">
+            <div class="game-stats">
+                <h2>Score: <span id="score">0</span></h2>
+            </div>
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+            
+            <div class="game-over glass-effect" id="gameOver">
+                <h2 class="glow-text">Game Over!</h2>
+                <p>Score: <span id="finalScore">0</span></p>
+                <button class="access-btn" onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+    </main>
+    <script src="../script.js"></script>
+    <script src="neon-runner.js"></script>
+    <script>
+        // Load navigation from nav.html
+        async function loadNav() {
+            try {
+                const response = await fetch('https://neongames00.github.io/navnav.html');
+                const nav = await response.text();
+                document.getElementById('nav-container').innerHTML = nav;
+            } catch (error) {
+                console.error('Error loading navigation:', error);
+                document.getElementById('nav-container').innerHTML = '<p>Error loading navigation. Please try again later.</p>';
+            }
+        }
+
+        // Fetch assignments and load navigation when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNav();
+            fetchAssignments();
+        });
+    </script>
+</body>
+</html>

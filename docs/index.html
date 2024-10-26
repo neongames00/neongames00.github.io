@@ -4,47 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neon Games</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.png" type="image/png">
+    <style>
+        :root {
+            --neon-primary: #0ff;
+            --neon-secondary: #f0f;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(45deg, #000, #1a1a1a);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px var(--neon-primary),
+                         0 0 20px var(--neon-primary),
+                         0 0 30px var(--neon-primary);
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px var(--neon-primary),
+                            0 0 10px var(--neon-primary),
+                            0 0 15px var(--neon-primary);
+            }
+            to {
+                text-shadow: 0 0 10px var(--neon-primary),
+                            0 0 20px var(--neon-primary),
+                            0 0 30px var(--neon-primary);
+            }
+        }
+
+        .content-wrapper {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--glass-border);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .game-list {
+            list-style: none;
+        }
+
+        .game-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .game-item.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: var(--neon-primary);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .game-container {
+            flex-grow: 1;
+            position: relative;
+            background: #000;
+        }
+
+        .game-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: var(--neon-primary);
+        }
+    </style>
 </head>
 <body>
     <header class="glass-header">
-        <div class="logo-container">
-            <h1 class="glow-text">Neon Games</h1>
-        </div>
+        <h1 class="glow-text">Neon Games</h1>
     </header>
+    
+    <div class="content-wrapper">
+        <aside class="sidebar">
+            <ul class="game-list">
+                <li class="game-item active" data-game="neon-runner">NEON RUNNER</li>
+                <li class="game-item" data-game="neon-duel">NEON DUEL</li>
+                <li class="game-item" data-game="neon-blocks">NEON BLOCKS</li>
+                <li class="game-item" data-game="neon-arcade">NEON ARCADE</li>
+            </ul>
+        </aside>
+        
+        <main class="game-container">
+            <button class="fullscreen-btn">Fullscreen</button>
+            <iframe class="game-iframe" src="games/neon-runner.html" allowfullscreen></iframe>
+        </main>
+    </div>
 
-    <main class="fade-in">
-        <div class="games-container">
-            <h2 class="section-title glow-text">Available Games</h2>
-            <div class="resources-grid">
-                <div class="resource-card glass-effect">
-                    <h3 class="resource-title">NEON RUNNER</h3>
-                    <p class="resource-description">An endless runner where you dodge obstacles and collect points!</p>
-                    <a href="https://neongames00.github.io/games/neon-runner.html" class="access-btn">PLAY GAME</a>
-                </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameItems = document.querySelectorAll('.game-item');
+            const gameIframe = document.querySelector('.game-iframe');
+            const fullscreenBtn = document.querySelector('.fullscreen-btn');
 
-                <div class="resource-card glass-effect">
-                    <h3 class="resource-title">NEON DUEL</h3>
-                    <p class="resource-description">A 1v1 fighting game with neon warriors!</p>
-                    <a href="https://neongames00.github.io/games/neon-duel.html" class="access-btn">PLAY GAME</a>
-                </div>
-            </div>
-            <div class="resources-grid">
-                <div class="resource-card glass-effect">
-                    <h3 class="resource-title">NEON BLOCKS</h3>
-                    <p class="resource-description">A tetris-style block game!</p>
-                    <a href="https://neongames00.github.io/games/neon-blocks.html" class="access-btn">PLAY GAME</a>
-                </div>
-                
-                <div class="resource-card glass-effect">
-                    <h3 class="resource-title">NEON ARCADE</h3>
-                    <p class="resource-description">An arcade game where you must navigate the terrain to escape the rising lava!</p>
-                    <a href="https://neongames00.github.io/games/neon-arcade.html" class="access-btn">PLAY GAME</a>
-                </div>
-            </div>
-        </div>
-    </main>
-    <script src="script.js"></script>
+            // Game selection
+            gameItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Update active state
+                    gameItems.forEach(gi => gi.classList.remove('active'));
+                    item.classList.add('active');
+
+                    // Update iframe source
+                    const gameName = item.dataset.game;
+                    gameIframe.src = `games/${gameName}.html`;
+                });
+            });
+
+            // Fullscreen handling
+            fullscreenBtn.addEventListener('click', () => {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    gameIframe.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                }
+            });
+
+            // Update fullscreen button text
+            document.addEventListener('fullscreenchange', () => {
+                fullscreenBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
+            });
+        });
+    </script>
 </body>
 </html>

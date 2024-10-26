@@ -104,28 +104,10 @@
             border: 2px solid #2196F3;
             box-shadow: 0 0 20px #2196F3;
         }
-
-        #fullscreenBtn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 16px;
-            background: rgba(33, 150, 243, 0.3);
-            border: 1px solid #2196F3;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            z-index: 1000;
-        }
-
-        #fullscreenBtn:hover {
-            background: rgba(33, 150, 243, 0.5);
-        }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <button id="fullscreenBtn">⤢ Fullscreen</button>
         
         <div class="health-bars">
             <div class="health-bar player1-health">
@@ -166,44 +148,6 @@
         </div>
     </div>
 
-    <script>
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const gameCanvas = document.getElementById('gameCanvas');
-
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                if (gameCanvas.requestFullscreen) {
-                    gameCanvas.requestFullscreen();
-                } else if (gameCanvas.webkitRequestFullscreen) {
-                    gameCanvas.webkitRequestFullscreen();
-                } else if (gameCanvas.msRequestFullscreen) {
-                    gameCanvas.msRequestFullscreen();
-                }
-                gameCanvas.classList.add('fullscreen');
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                gameCanvas.classList.remove('fullscreen');
-            }
-        });
-
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.addEventListener('msfullscreenchange', handleFullscreenChange);
-
-        function handleFullscreenChange() {
-            if (!document.fullscreenElement && 
-                !document.webkitFullscreenElement && 
-                !document.msFullscreenElement) {
-                gameCanvas.classList.remove('fullscreen');
-            }
-        }
-    </script>
     <script src="neon-duel.js"></script>
 </body>
 </html>

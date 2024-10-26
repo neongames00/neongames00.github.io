@@ -70,8 +70,8 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.players = [
-            new Player(this.canvas, '#00ffff', 'keyboard'),
-            new Player(this.canvas, '#ff00ff', 'touch'),
+            new Player(this.canvas, '#00ffff', 'keyboard'), // Player 1
+            new Player(this.canvas, '#ff00ff', 'touch'), // Player 2
         ];
         this.hoop = new Hoop(this.canvas);
         this.gameOver = false;
@@ -81,16 +81,17 @@ class Game {
 
     init() {
         document.addEventListener('keydown', (e) => {
-            if (e.code === 'ArrowLeft') this.players[0].move('left');
-            if (e.code === 'ArrowRight') this.players[0].move('right');
-            if (e.code === 'Space') this.players[0].jump();
-            if (e.code === 'KeyZ') this.players[0].shoot(); // Shoot with 'Z'
-        });
+            // Player 1 Controls
+            if (e.code === 'KeyA') this.players[0].move('left');
+            if (e.code === 'KeyD') this.players[0].move('right');
+            if (e.code === 'KeyW') this.players[0].jump();
+            if (e.code === 'KeyF') this.players[0].shoot(); // Shoot with 'F'
 
-        document.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.players[1].jump();
-            // Implement touch controls for player 2
+            // Player 2 Controls
+            if (e.code === 'ArrowLeft') this.players[1].move('left');
+            if (e.code === 'ArrowRight') this.players[1].move('right');
+            if (e.code === 'ArrowUp') this.players[1].jump();
+            if (e.code === 'KeyK') this.players[1].shoot(); // Shoot with 'K'
         });
 
         this.animate();

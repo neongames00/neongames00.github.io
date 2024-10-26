@@ -30,6 +30,7 @@ class Player {
     shoot() {
         if (this.grounded) {
             const ball = new Ball(this.canvas, this.x + this.size / 2, this.y);
+            ball.setPlayer(this); // Assign the shooting player to the ball
             this.balls.push(ball);
         }
     }
@@ -46,6 +47,8 @@ class Player {
 
         // Update basketballs
         this.balls.forEach(ball => ball.update());
+        // Filter out balls that are off-screen
+        this.balls = this.balls.filter(ball => !ball.isOffScreen);
     }
 
     draw(ctx) {
@@ -62,15 +65,32 @@ class Ball {
         this.y = y;
         this.radius = 10;
         this.dy = -5; // Initial upward velocity
+        this.dx = 2; // Horizontal velocity for curve
+        this.isOffScreen = false;
+        this.scored = false; // To check if the ball has scored
+    }
+
+    setPlayer(player) {
+        this.player = player; // Reference to the player who shot the ball
     }
 
     update() {
         this.y += this.dy; // Move the ball
+        this.x += this.dx; // Move the ball horizontally
         this.dy += 0.2; // Simulate gravity
 
-        // Remove ball if it goes off-screen
-        if (this.y > this.canvas.height) {
-            this.y = -10; // Reset position to indicate it should be removed
+        // Check for scoring
+        if (this.y > this.canvas.height - 50 && !this.scored) {
+            const hoop = new Hoop(this.canvas);
+            if (this.x > hoop.x && this.x < hoop.x + hoop.width) {
+                this.player.score++; // Update player score
+                this.scored = true; // Mark as scored
+            }
+        }
+
+        // Remove ball if it goes off-screen or scored
+        if (this.y > this.canvas.height || this.scored) {
+            this.isOffScreen = true; // Mark ball for removal
         }
     }
 

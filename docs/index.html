@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neon Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --neon-primary: #0ff;
@@ -16,10 +17,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Orbitron', sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(45deg, #000, #1a1a1a);
             color: white;
             min-height: 100vh;
@@ -32,6 +33,8 @@
             border-bottom: 1px solid var(--glass-border);
             padding: 1rem;
             text-align: center;
+            position: relative;
+            z-index: 2;
         }
 
         .glow-text {
@@ -39,6 +42,7 @@
                          0 0 20px var(--neon-primary),
                          0 0 30px var(--neon-primary);
             animation: glow 1.5s ease-in-out infinite alternate;
+            letter-spacing: 2px;
         }
 
         @keyframes glow {
@@ -60,12 +64,14 @@
         }
 
         .sidebar {
-            width: 250px;
+            width: 300px;
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             border-right: 1px solid var(--glass-border);
             padding: 1rem;
             overflow-y: auto;
+            position: relative;
+            z-index: 1;
         }
 
         .game-list {
@@ -73,24 +79,47 @@
         }
 
         .game-item {
-            padding: 1rem;
-            margin: 0.5rem 0;
+            padding: 1.2rem;
+            margin: 1rem 0;
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--glass-border);
-            border-radius: 8px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 2px;
+        }
+
+        .game-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
         }
 
         .game-item:hover {
-            background: rgba(0, 255, 255, 0.1);
-            transform: translateX(5px);
+            transform: translateX(10px);
+            border-color: var(--neon-primary);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .game-item:hover::before {
+            transform: translateX(100%);
         }
 
         .game-item.active {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: var(--neon-primary);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.15);
+            border: 2px solid var(--neon-primary);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 15px rgba(0, 255, 255, 0.2);
+            transform: translateX(15px) scale(1.05);
         }
 
         .game-container {
@@ -104,11 +133,31 @@
             height: 100%;
             border: none;
         }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-primary);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            border-radius: 4px;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
     <header class="glass-header">
-        <h1 class="glow-text">Neon Games</h1>
+        <h1 class="glow-text">NEON GAMES</h1>
     </header>
     
     <div class="content-wrapper">
@@ -122,14 +171,22 @@
         </aside>
         
         <main class="game-container">
-            <button class="fullscreen-btn">Fullscreen</button>
+            <button class="fullscreen-btn">FULLSCREEN</button>
+            <iframe id="gameFrame" class="game-iframe" src="games/neon-runner.html"></iframe>
         </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const gameItems = document.querySelectorAll('.game-item');
-            const gameIframe = document.querySelector('.game-iframe');
+            const gameFrame = document.getElementById('gameFrame');
+            const fullscreenBtn = document.querySelector('.fullscreen-btn');
+
+            // Set initial game
+            const activeGame = document.querySelector('.game-item.active');
+            if (activeGame) {
+                gameFrame.src = `games/${activeGame.dataset.game}.html`;
+            }
 
             // Game selection
             gameItems.forEach(item => {
@@ -140,10 +197,25 @@
 
                     // Update iframe source
                     const gameName = item.dataset.game;
-                    gameIframe.src = `games/${gameName}.html`;
+                    gameFrame.src = `games/${gameName}.html`;
                 });
             });
 
+            // Fullscreen handling
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    gameFrame.requestFullscreen().catch(err => {
+                        console.error('Error attempting to enable fullscreen:', err);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+
+            // Update button text based on fullscreen state
+            document.addEventListener('fullscreenchange', () => {
+                fullscreenBtn.textContent = document.fullscreenElement ? 'EXIT FULLSCREEN' : 'FULLSCREEN';
+            });
         });
     </script>
 </body>

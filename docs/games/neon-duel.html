@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Duel</title>
+    <link rel="stylesheet" href="https://neongames00.github.io/styles.css">
+    <link rel="icon" href="../favicon.png" type="image/png">
+    <style>
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #gameCanvas {
+            border: 2px solid var(--accent-color);
+            background: black;
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+            margin-top: 20px;
+        }
+
+        .player-controls {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--accent-color);
+        }
+
+        .player-controls h3 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .control-key {
+            display: inline-block;
+            padding: 5px 10px;
+            background: rgba(33, 150, 243, 0.3);
+            border: 1px solid var(--accent-color);
+            border-radius: 5px;
+            color: white;
+            margin: 2px;
+        }
+
+        #gameOver {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+
+        .health-bars {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+            margin-bottom: 10px;
+        }
+
+        .health-bar {
+            width: 300px;
+            height: 20px;
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2196F3, #00FFFF);
+            transition: width 0.3s ease;
+        }
+
+        .player2-health .health-fill {
+            float: right;
+            background: linear-gradient(90deg, #FF00FF, #FF69B4);
+        }
+    </style>
+</head>
+<body>
+    <header class="glass-header">
+        <div class="logo-container">
+            <h1 class="glow-text">Neon Duel</h1>
+        </div>
+        <div id="nav-container"></div> <!-- Placeholder for navigation -->
+    </header>
+
+    <main class="fade-in">
+        <div class="game-container">
+            <div class="health-bars">
+                <div class="health-bar player1-health">
+                    <div class="health-fill" id="p1Health" style="width: 100%"></div>
+                </div>
+                <div class="health-bar player2-health">
+                    <div class="health-fill" id="p2Health" style="width: 100%"></div>
+                </div>
+            </div>
+            
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+            
+            <div class="controls-container">
+                <div class="player-controls">
+                    <h3>Player 1 Controls</h3>
+                    <span class="control-key">A</span> Left
+                    <span class="control-key">D</span> Right
+                    <span class="control-key">W</span> Jump
+                    <span class="control-key">F</span> Attack
+                    <span class="control-key">G</span> Special
+                </div>
+            </div>
+            <div class="controls-container">
+                <div class="player-controls">
+                    <h3>Player 2 Controls</h3>
+                    <span class="control-key">←</span> Left
+                    <span class="control-key">→</span> Right
+                    <span class="control-key">↑</span> Jump
+                    <span class="control-key">K</span> Attack
+                    <span class="control-key">L</span> Special
+                </div>
+            </div>
+
+            <div id="gameOver" class="glass-effect">
+                <h2 class="glow-text">Game Over!</h2>
+                <p id="winner"></p>
+                <button class="access-btn" onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+    </main>
+    <script src="../script.js"></script>
+    <script src="neon-duel.js"></script>
+    <script>
+        // Load navigation from nav.html
+        async function loadNav() {
+            try {
+                const response = await fetch('https://neongames00.github.io/navnav.html');
+                const nav = await response.text();
+                document.getElementById('nav-container').innerHTML = nav;
+            } catch (error) {
+                console.error('Error loading navigation:', error);
+                document.getElementById('nav-container').innerHTML = '<p>Error loading navigation. Please try again later.</p>';
+            }
+        }
+
+        // Fetch assignments and load navigation when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNav();
+            fetchAssignments();
+        });
+    </script>
+</body>
+</html>

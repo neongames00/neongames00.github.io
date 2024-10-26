@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500&display=swap" rel="stylesheet">
+    <title>Neon Pong</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: black;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #gameCanvas {
+            border: 2px solid #2196F3;
+            background: black;
+            box-shadow: 0 0 20px #2196F3;
+        }
+
+        #score {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #2196F3;
+        }
+
+        #gameOver {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid #2196F3;
+            box-shadow: 0 0 20px #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div id="score">Player 1: 0 | Player 2: 0</div>
+        <div id="gameOver">
+            <h2>Game Over!</h2>
+            <p id="winner"></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script src="neon-pong.js"></script>
+</body>
+</html>

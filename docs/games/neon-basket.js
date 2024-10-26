@@ -11,6 +11,7 @@ class Player {
         this.color = color;
         this.controlScheme = controlScheme;
         this.score = 0;
+        this.balls = []; // Array to hold basketballs
     }
 
     jump() {
@@ -26,6 +27,13 @@ class Player {
         this.x = Math.max(0, Math.min(this.x, this.canvas.width - this.size));
     }
 
+    shoot() {
+        if (this.grounded) {
+            const ball = new Ball(this.canvas, this.x + this.size / 2, this.y);
+            this.balls.push(ball);
+        }
+    }
+
     update() {
         this.dy += this.gravity;
         this.y += this.dy;
@@ -35,18 +43,43 @@ class Player {
             this.dy = 0;
             this.grounded = true;
         }
+
+        // Update basketballs
+        this.balls.forEach(ball => ball.update());
     }
 
     draw(ctx) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.size, this.size);
+        this.balls.forEach(ball => ball.draw(ctx)); // Draw basketballs
+    }
+}
+
+class Ball {
+    constructor(canvas, x, y) {
+        this.canvas = canvas;
+        this.x = x;
+        this.y = y;
+        this.radius = 10;
+        this.dy = -5; // Initial upward velocity
     }
 
-    shoot() {
-        if (this.grounded) {
-            // Shooting mechanics can be implemented here
-            this.score++;
+    update() {
+        this.y += this.dy; // Move the ball
+        this.dy += 0.2; // Simulate gravity
+
+        // Remove ball if it goes off-screen
+        if (this.y > this.canvas.height) {
+            this.y = -10; // Reset position to indicate it should be removed
         }
+    }
+
+    draw(ctx) {
+        ctx.fillStyle = '#FFD700'; // Color for the basketball
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.closePath();
     }
 }
 

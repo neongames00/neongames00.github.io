@@ -35,7 +35,7 @@ class Motorcycle {
 }
 
 class Obstacle {
-    constructor(canvas) {
+    constructor(canvas, speed) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d');
         this.x = Math.random() * (this.canvas.width - 50);
@@ -43,7 +43,7 @@ class Obstacle {
         this.width = 50;
         this.height = 50;
         this.color = '#ff00ff';
-        this.speed = 4 + Math.random() * 2; // Varying speed for obstacles
+        this.speed = speed;
     }
 
     draw() {
@@ -66,18 +66,21 @@ class Game {
         this.motorcycle = new Motorcycle(this.canvas);
         this.obstacles = [];
         this.isGameOver = false;
+        this.speed = 4; // Initial speed for obstacles
+        this.spawnRate = 1500; // Initial spawn rate for obstacles
 
         this.spawnObstacle();
         this.animate();
         this.setupControls();
+        this.increaseDifficulty();
     }
 
     spawnObstacle() {
-        const obstacle = new Obstacle(this.canvas);
+        const obstacle = new Obstacle(this.canvas, this.speed);
         this.obstacles.push(obstacle);
         setTimeout(() => {
             if (!this.isGameOver) this.spawnObstacle();
-        }, 1500); // Spawn an obstacle every 1.5 seconds
+        }, this.spawnRate); // Spawn an obstacle based on the current spawn rate
     }
 
     setupControls() {
@@ -106,6 +109,15 @@ class Game {
         this.isGameOver = true;
         document.getElementById('finalScore').textContent = `You hit ${this.motorcycle.collisions} obstacles!`;
         document.getElementById('gameOver').style.display = 'block';
+    }
+
+    increaseDifficulty() {
+        setInterval(() => {
+            if (!this.isGameOver) {
+                this.speed += 0.5; // Increase speed of obstacles
+                this.spawnRate = Math.max(500, this.spawnRate - 100); // Decrease spawn rate to make more obstacles appear
+            }
+        }, 10000); // Increase difficulty every 10 seconds
     }
 
     update() {

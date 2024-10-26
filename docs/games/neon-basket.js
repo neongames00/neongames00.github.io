@@ -79,12 +79,12 @@ class Ball {
         this.x += this.dx; // Move the ball horizontally
         this.dy += 0.2; // Simulate gravity
 
-        // Check for scoring
+        // Check for scoring when the ball touches the net
         if (this.y > this.canvas.height - 50 && !this.scored) {
             const hoop = new Hoop(this.canvas);
             if (this.x > hoop.x && this.x < hoop.x + hoop.width) {
-                this.player.score++; // Update player score
                 this.scored = true; // Mark as scored
+                this.player.score++; // Update player score
             }
         }
 
@@ -109,7 +109,7 @@ class Hoop {
         this.width = 80;
         this.height = 10;
         this.x = canvas.width / 2 - this.width / 2;
-        this.y = 100;
+        this.y = 150; // Lowered the hoop
     }
 
     draw(ctx) {
@@ -172,7 +172,7 @@ class Game {
         this.ctx.fillStyle = 'white';
         this.ctx.font = '20px Arial';
         this.ctx.fillText(`Player 1 Score: ${this.players[0].score}`, 10, 20);
-        this.ctx.fillText(`Player 2 Score: ${this.players[1].score}`, this.canvas.width - 150, 20);
+        this.ctx.fillText(`Player 2 Score: ${this.players[1].score}`, this.canvas.width - 160, 20); // Adjusted position for Player 2
     }
 
     displayTimer() {

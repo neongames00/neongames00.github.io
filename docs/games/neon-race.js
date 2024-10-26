@@ -317,14 +317,16 @@ class Game {
         // Clear canvas
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Draw only the active tracks
+    
+        // Draw only the active tracks that are not transitioning out
         this.tracks.forEach((track, index) => {
             if (index === this.player1.currentTrack || index === this.player2.currentTrack) {
-                track.draw(this.ctx);
+                if (!track.transitionOut) {
+                    track.draw(this.ctx);
+                }
             }
         });
-
+    
         // Draw players
         this.player1.draw(this.ctx);
         this.player2.draw(this.ctx);

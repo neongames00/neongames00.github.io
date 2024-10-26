@@ -2,8 +2,8 @@ class Racer {
     constructor(x, y, color, controls) {
         this.x = x;
         this.y = y;
-        this.width = 30;
-        this.height = 50;
+        this.width = 50;  // Made car wider
+        this.height = 30; // Made car shorter
         this.color = color;
         this.velocity = {
             x: 0,
@@ -16,29 +16,36 @@ class Racer {
         this.friction = 0.95;
         this.controls = controls;
         this.currentTrack = 0;
-        this.laps = [0, 0, 0]; // Laps completed for each track
-        this.checkpoints = new Set(); // Track checkpoints passed
+        this.laps = [0, 0, 0];
+        this.checkpoints = new Set();
+        this.transitioningTrack = false;
+        this.transitionAlpha = 1;
     }
 
     update(canvas, obstacles) {
-        // Update speed based on acceleration/deceleration
+        if (this.transitioningTrack) {
+            this.transitionAlpha -= 0.05;
+            if (this.transitionAlpha <= 0) {
+                this.transitioningTrack = false;
+                this.transitionAlpha = 1;
+            }
+            return;
+        }
+
         if (this.speed > 0) this.speed *= this.friction;
         if (this.speed < 0) this.speed *= this.friction;
         
-        // Update position based on angle and speed
         this.x += Math.cos(this.angle) * this.speed;
         this.y += Math.sin(this.angle) * this.speed;
 
-        // Wall collision
         if (this.x < 0) this.x = 0;
         if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
         if (this.y < 0) this.y = 0;
         if (this.y + this.height > canvas.height) this.y = canvas.height - this.height;
 
-        // Check collision with obstacles
         for (let obstacle of obstacles) {
             if (this.checkCollision(obstacle)) {
-                this.speed *= -0.5; // Bounce back on collision
+                this.speed *= -0.5;
             }
         }
     }
@@ -51,23 +58,47 @@ class Racer {
     }
 
     draw(ctx) {
+        if (this.transitioningTrack) {
+            ctx.globalAlpha = this.transitionAlpha;
+        }
+
         ctx.save();
         ctx.translate(this.x + this.width/2, this.y + this.height/2);
         ctx.rotate(this.angle);
         
-        // Draw car with glow effect
+        // Draw car body with glow effect
         ctx.fillStyle = this.color;
         ctx.shadowBlur = 20;
         ctx.shadowColor = this.color;
         ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
         
-        // Draw headlights
+        // Draw headlights on the front (shorter side)
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-this.width/2, -this.height/2, 5, 5);
-        ctx.fillRect(this.width/2 - 5, -this.height/2, 5, 5);
+        ctx.shadowColor = '#ffffff';
+        // Left headlight
+        ctx.fillRect(this.width/2 - 5, -this.height/4, 5, 5);
+        // Right headlight
+        ctx.fillRect(this.width/2 - 5, this.height/4 - 5, 5, 5);
+        
+        // Draw rear lights on the back (shorter side)
+        ctx.fillStyle = '#ff0000';
+        ctx.shadowColor = '#ff0000';
+        // Left rear light
+        ctx.fillRect(-this.width/2, -this.height/4, 3, 3);
+        // Right rear light
+        ctx.fillRect(-this.width/2, this.height/4 - 3, 3, 3);
         
         ctx.shadowBlur = 0;
         ctx.restore();
+
+        if (this.transitioningTrack) {
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    startTrackTransition() {
+        this.transitioningTrack = true;
+        this.transitionAlpha = 1;
     }
 }
 
@@ -77,9 +108,21 @@ class Track {
         this.obstacles = obstacles;
         this.checkpoints = checkpoints;
         this.startPosition = startPosition;
+        this.transitionOut = false;
+        this.transitionAlpha = 1;
     }
 
     draw(ctx) {
+        if (this.transitionOut) {
+            ctx.globalAlpha = this.transitionAlpha;
+        }
+
+        // Draw track border
+        ctx.strokeStyle = '#00ffff';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#00ffff';
+        ctx.strokeRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
         // Draw obstacles with glow effect
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#00ffff';
@@ -97,6 +140,23 @@ class Track {
             ctx.stroke();
         }
         ctx.shadowBlur = 0;
+
+        if (this.transitionOut) {
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    startTransitionOut() {
+        this.transitionOut = true;
+        this.transitionAlpha = 1;
+    }
+
+    update() {
+        if (this.transitionOut) {
+            this.transitionAlpha -= 0.05;
+            return this.transitionAlpha <= 0;
+        }
+        return false;
     }
 }
 
@@ -201,22 +261,27 @@ class Game {
             if (distance < 30 && !player.checkpoints.has(checkpoint)) {
                 player.checkpoints.add(checkpoint);
                 
-                // Check if all checkpoints are collected
                 if (player.checkpoints.size === track.checkpoints.length) {
                     player.laps[player.currentTrack]++;
                     player.checkpoints.clear();
                     
-                    // Move to next track if completed current one
                     if (player.laps[player.currentTrack] >= 3) {
-                        player.currentTrack++;
-                        if (player.currentTrack >= this.tracks.length) {
-                            this.endGame(player === this.player1 ? 'Player 1' : 'Player 2');
-                            return;
-                        }
-                        // Reset position for new track
-                        const newTrack = this.tracks[player.currentTrack];
-                        player.x = newTrack.startPosition.x;
-                        player.y = newTrack.startPosition.y;
+                        // Start transition effect
+                        track.startTransitionOut();
+                        player.startTrackTransition();
+                        
+                        setTimeout(() => {
+                            player.currentTrack++;
+                            if (player.currentTrack >= this.tracks.length) {
+                                this.endGame(player === this.player1 ? 'Player 1' : 'Player 2');
+                                return;
+                            }
+                            const newTrack = this.tracks[player.currentTrack];
+                            player.x = newTrack.startPosition.x;
+                            player.y = newTrack.startPosition.y;
+                            player.speed = 0;
+                            player.angle = 0;
+                        }, 1000);
                     }
                 }
             }
@@ -231,6 +296,9 @@ class Game {
 
         this.player1.update(this.canvas, this.tracks[this.player1.currentTrack].obstacles);
         this.player2.update(this.canvas, this.tracks[this.player2.currentTrack].obstacles);
+
+        // Update tracks for transition effects
+        this.tracks.forEach(track => track.update());
 
         this.checkCheckpoints(this.player1);
         this.checkCheckpoints(this.player2);
@@ -250,11 +318,12 @@ class Game {
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw current tracks for both players
-        this.tracks[this.player1.currentTrack].draw(this.ctx);
-        if (this.player2.currentTrack !== this.player1.currentTrack) {
-            this.tracks[this.player2.currentTrack].draw(this.ctx);
-        }
+        // Draw only the active tracks
+        this.tracks.forEach((track, index) => {
+            if (index === this.player1.currentTrack || index === this.player2.currentTrack) {
+                track.draw(this.ctx);
+            }
+        });
 
         // Draw players
         this.player1.draw(this.ctx);

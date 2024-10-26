@@ -122,7 +122,6 @@
             transform: translateY(-5px) scale(1.05); /* Active state move up and scale */
         }
 
-
         .game-container {
             flex-grow: 1;
             position: relative;
@@ -135,7 +134,7 @@
             border: none;
         }
 
-        .fullscreen-btn {
+        .fullscreen-btn, .random-btn {
             position: absolute;
             top: 1rem;
             right: 1rem;
@@ -150,7 +149,7 @@
             border-radius: 4px;
         }
 
-        .fullscreen-btn:hover {
+        .fullscreen-btn:hover, .random-btn:hover {
             background: rgba(0, 255, 255, 0.2);
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
         }
@@ -159,12 +158,12 @@
 <body>
     <header class="glass-header">
         <h1 class="glow-text">NEON GAMES</h1>
+        <button class="random-btn">RANDOM</button> <!-- Add Random Button -->
     </header>
     
     <div class="content-wrapper">
         <aside class="sidebar">
             <h4>Any games that are <s>striked out</s> are not created yet!</h4>
-            <h4></h4>
             <ul class="game-list">
                 <li class="game-item" data-game="neon-runner">NEON RUNNER</li>
                 <li class="game-item" data-game="neon-duel">NEON DUEL</li>
@@ -202,6 +201,10 @@
             const gameItems = document.querySelectorAll('.game-item');
             const gameFrame = document.getElementById('gameFrame');
             const fullscreenBtn = document.querySelector('.fullscreen-btn');
+            const randomBtn = document.querySelector('.random-btn');
+
+            // Set array of game names for random selection
+            const gameNames = Array.from(gameItems).map(item => item.dataset.game);
 
             // Set initial game
             const activeGame = document.querySelector('.game-item.active');
@@ -230,6 +233,19 @@
                     });
                 } else {
                     document.exitFullscreen();
+                }
+            });
+
+            // Random game handling
+            randomBtn.addEventListener('click', () => {
+                const randomGame = gameNames[Math.floor(Math.random() * gameNames.length)];
+                gameFrame.src = `games/${randomGame}.html`;
+                
+                // Update active state in sidebar
+                gameItems.forEach(gi => gi.classList.remove('active'));
+                const selectedGameItem = Array.from(gameItems).find(item => item.dataset.game === randomGame);
+                if (selectedGameItem) {
+                    selectedGameItem.classList.add('active');
                 }
             });
 

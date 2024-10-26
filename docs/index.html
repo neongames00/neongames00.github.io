@@ -12,7 +12,6 @@
         <div class="logo-container">
             <h1 class="glow-text">Neon Games</h1>
         </div>
-        <div id="nav-container"></div> <!-- Placeholder for navigation -->
     </header>
 
     <main class="fade-in">
@@ -47,24 +46,5 @@
         </div>
     </main>
     <script src="script.js"></script>
-    <script>
-        // Load navigation from nav.html
-        async function loadNav() {
-            try {
-                const response = await fetch('navnav.html');
-                const nav = await response.text();
-                document.getElementById('nav-container').innerHTML = nav;
-            } catch (error) {
-                console.error('Error loading navigation:', error);
-                document.getElementById('nav-container').innerHTML = '<p>Error loading navigation. Please try again later.</p>';
-            }
-        }
-
-        // Fetch assignments and load navigation when the page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            loadNav();
-            fetchAssignments();
-        });
-    </script>
 </body>
 </html>

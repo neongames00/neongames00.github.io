@@ -22,7 +22,7 @@ class Racer {
         this.transitionAlpha = 1;
     }
 
-    update(canvas, obstacles) {
+    update(canvas, obstacles, otherRacers) {
         if (this.transitioningTrack) {
             this.transitionAlpha -= 0.05;
             if (this.transitionAlpha <= 0) {
@@ -31,31 +31,59 @@ class Racer {
             }
             return;
         }
-
+    
+        // Apply friction to speed
         if (this.speed > 0) this.speed *= this.friction;
         if (this.speed < 0) this.speed *= this.friction;
-        
+    
+        // Update position based on speed and angle
         this.x += Math.cos(this.angle) * this.speed;
         this.y += Math.sin(this.angle) * this.speed;
-
-        if (this.x < 0) this.x = 0;
-        if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
-        if (this.y < 0) this.y = 0;
-        if (this.y + this.height > canvas.height) this.y = canvas.height - this.height;
-
+    
+        // Wall collision
+        if (this.x < 0) {
+            this.x = 0;
+            this.speed *= -1; // Bounce back
+        }
+        if (this.x + this.width > canvas.width) {
+            this.x = canvas.width - this.width;
+            this.speed *= -1; // Bounce back
+        }
+        if (this.y < 0) {
+            this.y = 0;
+            this.speed *= -1; // Bounce back
+        }
+        if (this.y + this.height > canvas.height) {
+            this.y = canvas.height - this.height;
+            this.speed *= -1; // Bounce back
+        }
+    
+        // Obstacle collision
         for (let obstacle of obstacles) {
             if (this.checkCollision(obstacle)) {
-                this.speed *= -0.5;
+                this.speed *= -0.5; // Reduce speed on wall collision
+            }
+        }
+    
+        // Other racer collision
+        for (let other of otherRacers) {
+            if (other !== this && this.checkCollision(other)) {
+                // Simple collision response: reverse speed
+                this.speed *= -0.5; // Reduce speed on collision
             }
         }
     }
 
-    checkCollision(obstacle) {
-        return (this.x < obstacle.x + obstacle.width &&
-                this.x + this.width > obstacle.x &&
-                this.y < obstacle.y + obstacle.height &&
-                this.y + this.height > obstacle.y);
+
+    checkCollision(other) {
+        return (
+            this.x < other.x + other.width &&
+            this.x + this.width > other.x &&
+            this.y < other.y + other.height &&
+            this.y + this.height > other.y
+        );
     }
+
 
     draw(ctx) {
         if (this.transitioningTrack) {
@@ -290,21 +318,24 @@ class Game {
 
     update() {
         if (this.gameOver) return;
-
+    
         this.handleInput(this.player1);
         this.handleInput(this.player2);
-
-        this.player1.update(this.canvas, this.tracks[this.player1.currentTrack].obstacles);
-        this.player2.update(this.canvas, this.tracks[this.player2.currentTrack].obstacles);
-
+    
+        const otherRacers = [this.player1, this.player2];
+    
+        this.player1.update(this.canvas, this.tracks[this.player1.currentTrack].obstacles, otherRacers);
+        this.player2.update(this.canvas, this.tracks[this.player2.currentTrack].obstacles, otherRacers);
+    
         // Update tracks for transition effects
         this.tracks.forEach(track => track.update());
-
+    
         this.checkCheckpoints(this.player1);
         this.checkCheckpoints(this.player2);
-
+    
         this.updateProgress();
     }
+
 
     updateProgress() {
         document.getElementById('p1Progress').textContent = 

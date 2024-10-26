@@ -104,25 +104,6 @@
             height: 100%;
             border: none;
         }
-
-        .fullscreen-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-
-        .fullscreen-btn:hover {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: var(--neon-primary);
-        }
     </style>
 </head>
 <body>
@@ -142,7 +123,6 @@
         
         <main class="game-container">
             <button class="fullscreen-btn">Fullscreen</button>
-            <iframe class="game-iframe" src="games/neon-runner.html" allowfullscreen></iframe>
         </main>
     </div>
 
@@ -150,7 +130,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const gameItems = document.querySelectorAll('.game-item');
             const gameIframe = document.querySelector('.game-iframe');
-            const fullscreenBtn = document.querySelector('.fullscreen-btn');
 
             // Game selection
             gameItems.forEach(item => {
@@ -165,21 +144,6 @@
                 });
             });
 
-            // Fullscreen handling
-            fullscreenBtn.addEventListener('click', () => {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                } else {
-                    gameIframe.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                    });
-                }
-            });
-
-            // Update fullscreen button text
-            document.addEventListener('fullscreenchange', () => {
-                fullscreenBtn.textContent = document.fullscreenElement ? 'Exit Fullscreen' : 'Fullscreen';
-            });
         });
     </script>
 </body>

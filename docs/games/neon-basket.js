@@ -37,17 +37,20 @@ class Player {
     }
 
     shoot() {
-        const ball = new Ball(this.canvas, this.x + this.size / 2, this.y);
+        const ball = new Ball(this.canvas, this.x + this.size / 2, this.y, this.gameHoop);
         ball.setPlayer(this);
         
         const hoopCenterX = this.canvas.width / 2;
         const shootingLeft = this.x > hoopCenterX;
         
-        // Reduced initial upward velocity for lower shots
         ball.dy = -7; 
         ball.dx = shootingLeft ? -4 : 4;
         
         this.balls.push(ball);
+    }
+
+    setGameHoop(hoop) {
+        this.gameHoop = hoop;
     }
 
     update() {
@@ -76,7 +79,7 @@ class Player {
 }
 
 class Ball {
-    constructor(canvas, x, y) {
+    constructor(canvas, x, y, gameHoop) {
         this.canvas = canvas;
         this.x = x;
         this.y = y;
@@ -85,6 +88,7 @@ class Ball {
         this.dx = 2;
         this.isOffScreen = false;
         this.scored = false;
+        this.gameHoop = gameHoop;
     }
 
     setPlayer(player) {
@@ -96,12 +100,11 @@ class Ball {
         this.x += this.dx;
         this.dy += 0.2;
 
-        const hoop = new Hoop(this.canvas);
         const ballBottom = this.y + this.radius;
         const ballTop = this.y - this.radius;
         
-        if (ballBottom >= hoop.y && ballTop <= hoop.y + hoop.height && 
-            this.x > hoop.x && this.x < hoop.x + hoop.width && !this.scored) {
+        if (ballBottom >= this.gameHoop.y && ballTop <= this.gameHoop.y + this.gameHoop.height && 
+            this.x > this.gameHoop.x && this.x < this.gameHoop.x + this.gameHoop.width && !this.scored) {
             this.scored = true;
             this.player.score++;
         }
@@ -136,17 +139,15 @@ class Hoop {
     }
 
     update() {
-        // Random movement logic
         this.moveTimer++;
-        if (this.moveTimer >= 60) { // Change direction every 60 frames
+        if (this.moveTimer >= 60) {
             this.direction = Math.random() > 0.5 ? 1 : -1;
-            this.speed = Math.random() * 3 + 1; // Random speed between 1 and 4
+            this.speed = Math.random() * 3 + 1;
             this.moveTimer = 0;
         }
 
         this.x += this.speed * this.direction;
 
-        // Bounce off walls
         if (this.x <= 0) {
             this.x = 0;
             this.direction = 1;
@@ -170,11 +171,14 @@ class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.hoop = new Hoop(this.canvas);
         this.players = [
             new Player(this.canvas, '#00ffff', 'keyboard'),
             new Player(this.canvas, '#ff00ff', 'touch'),
         ];
-        this.hoop = new Hoop(this.canvas);
+        
+        this.players.forEach(player => player.setGameHoop(this.hoop));
+        
         this.gameOver = false;
         this.timer = 60;
         this.init();
@@ -183,6 +187,7 @@ class Game {
     reset() {
         this.players.forEach(player => player.reset());
         this.hoop = new Hoop(this.canvas);
+        this.players.forEach(player => player.setGameHoop(this.hoop));
         this.gameOver = false;
         this.timer = 60;
     }
@@ -213,7 +218,7 @@ class Game {
     update() {
         if (!this.gameOver) {
             this.players.forEach(player => player.update());
-            this.hoop.update(); // Update hoop position
+            this.hoop.update();
             this.timer -= 0.016;
             if (this.timer <= 0) this.endGame();
         }
@@ -223,7 +228,6 @@ class Game {
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw floor line
         this.ctx.shadowColor = '#ffffff';
         this.ctx.shadowBlur = 15;
         this.ctx.strokeStyle = '#ffffff';

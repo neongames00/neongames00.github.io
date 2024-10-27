@@ -14,6 +14,15 @@ class Player {
         this.balls = [];
     }
 
+    reset() {
+        this.x = this.controlScheme === 'keyboard' ? 50 : this.canvas.width - 80;
+        this.y = this.canvas.height - this.size - 10;
+        this.dy = 0;
+        this.grounded = true;
+        this.score = 0;
+        this.balls = [];
+    }
+
     jump() {
         if (this.grounded) {
             this.dy = this.jumpForce;
@@ -28,17 +37,15 @@ class Player {
     }
 
     shoot() {
-        // Removed the grounded check to allow shooting while jumping
         const ball = new Ball(this.canvas, this.x + this.size / 2, this.y);
         ball.setPlayer(this);
         
-        // Determine shot direction based on player position relative to hoop
         const hoopCenterX = this.canvas.width / 2;
         const shootingLeft = this.x > hoopCenterX;
         
-        // Adjust initial velocities for higher arc and directed towards hoop
-        ball.dy = -10; // Increased upward velocity
-        ball.dx = shootingLeft ? -4 : 4; // Direction based on position
+        // Reduced initial upward velocity for lower shots
+        ball.dy = -7; 
+        ball.dx = shootingLeft ? -4 : 4;
         
         this.balls.push(ball);
     }
@@ -58,13 +65,10 @@ class Player {
     }
 
     draw(ctx) {
-        // Add neon glow effect
         ctx.shadowColor = this.color;
         ctx.shadowBlur = 15;
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.size, this.size);
-        
-        // Reset shadow for other drawings
         ctx.shadowBlur = 0;
         
         this.balls.forEach(ball => ball.draw(ctx));
@@ -77,7 +81,7 @@ class Ball {
         this.x = x;
         this.y = y;
         this.radius = 10;
-        this.dy = -10;
+        this.dy = -7;
         this.dx = 2;
         this.isOffScreen = false;
         this.scored = false;
@@ -92,7 +96,6 @@ class Ball {
         this.x += this.dx;
         this.dy += 0.2;
 
-        // More precise scoring detection - check if ball touches the net
         const hoop = new Hoop(this.canvas);
         const ballBottom = this.y + this.radius;
         const ballTop = this.y - this.radius;
@@ -109,7 +112,6 @@ class Ball {
     }
 
     draw(ctx) {
-        // Add neon glow effect
         ctx.shadowColor = '#FFD700';
         ctx.shadowBlur = 15;
         ctx.fillStyle = '#FFD700';
@@ -128,13 +130,37 @@ class Hoop {
         this.height = 10;
         this.x = canvas.width / 2 - this.width / 2;
         this.y = 150;
+        this.direction = 1;
+        this.speed = 2;
+        this.moveTimer = 0;
+    }
+
+    update() {
+        // Random movement logic
+        this.moveTimer++;
+        if (this.moveTimer >= 60) { // Change direction every 60 frames
+            this.direction = Math.random() > 0.5 ? 1 : -1;
+            this.speed = Math.random() * 3 + 1; // Random speed between 1 and 4
+            this.moveTimer = 0;
+        }
+
+        this.x += this.speed * this.direction;
+
+        // Bounce off walls
+        if (this.x <= 0) {
+            this.x = 0;
+            this.direction = 1;
+        }
+        if (this.x + this.width >= this.canvas.width) {
+            this.x = this.canvas.width - this.width;
+            this.direction = -1;
+        }
     }
 
     draw(ctx) {
-        // Add neon glow effect for the hoop
         ctx.shadowColor = '#ffffff';
         ctx.shadowBlur = 15;
-        ctx.fillStyle = '#ffffff'; // Changed to white
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(this.x, this.y, this.width, this.height);
         ctx.shadowBlur = 0;
     }
@@ -154,8 +180,20 @@ class Game {
         this.init();
     }
 
+    reset() {
+        this.players.forEach(player => player.reset());
+        this.hoop = new Hoop(this.canvas);
+        this.gameOver = false;
+        this.timer = 60;
+    }
+
     init() {
         document.addEventListener('keydown', (e) => {
+            if (this.gameOver && e.code === 'Space') {
+                this.reset();
+                return;
+            }
+
             // Player 1 Controls
             if (e.code === 'KeyA') this.players[0].move('left');
             if (e.code === 'KeyD') this.players[0].move('right');
@@ -173,8 +211,9 @@ class Game {
     }
 
     update() {
-        this.players.forEach(player => player.update());
         if (!this.gameOver) {
+            this.players.forEach(player => player.update());
+            this.hoop.update(); // Update hoop position
             this.timer -= 0.016;
             if (this.timer <= 0) this.endGame();
         }
@@ -184,7 +223,7 @@ class Game {
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw floor line with neon glow
+        // Draw floor line
         this.ctx.shadowColor = '#ffffff';
         this.ctx.shadowBlur = 15;
         this.ctx.strokeStyle = '#ffffff';
@@ -199,6 +238,10 @@ class Game {
         this.players.forEach(player => player.draw(this.ctx));
         this.displayScores();
         this.displayTimer();
+
+        if (this.gameOver) {
+            this.displayGameOver();
+        }
     }
 
     displayScores() {
@@ -207,7 +250,7 @@ class Game {
         this.ctx.fillStyle = 'white';
         this.ctx.font = '20px Arial';
         this.ctx.fillText(`Player 1 Score: ${this.players[0].score}`, 10, 20);
-        this.ctx.fillText(`Player 2 Score: ${this.players[1].score}`, this.canvas.width - 200, 20); // Moved more to the left
+        this.ctx.fillText(`Player 2 Score: ${this.players[1].score}`, this.canvas.width - 200, 20);
         this.ctx.shadowBlur = 0;
     }
 
@@ -220,6 +263,19 @@ class Game {
         this.ctx.shadowBlur = 0;
     }
 
+    displayGameOver() {
+        this.ctx.shadowColor = '#ffffff';
+        this.ctx.shadowBlur = 15;
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = '30px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('Game Over!', this.canvas.width / 2, this.canvas.height / 2);
+        this.ctx.font = '20px Arial';
+        this.ctx.fillText('Press SPACE to play again', this.canvas.width / 2, this.canvas.height / 2 + 40);
+        this.ctx.textAlign = 'left';
+        this.ctx.shadowBlur = 0;
+    }
+
     animate() {
         this.update();
         this.draw();
@@ -228,7 +284,6 @@ class Game {
 
     endGame() {
         this.gameOver = true;
-        alert(`Game Over! Player 1 Score: ${this.players[0].score}, Player 2 Score: ${this.players[1].score}`);
     }
 }
 
